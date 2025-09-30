@@ -1,0 +1,44 @@
+{
+	"schemaVersion": 1,
+	"id": "chisel-agent",
+	"version": "${version}",
+	"name": "Chisel Agent",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/chisel-agent/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"whiteheaven.chiselagent.ChiselAgent"
+		],
+		"client": [
+			"whiteheaven.chiselagent.ChiselAgentClient"
+		],
+		"fabric-datagen": [
+			"whiteheaven.chiselagent.ChiselAgentDataGenerator"
+		]
+	},
+	"mixins": [
+		"chisel-agent.mixins.json",
+		{
+			"config": "chisel-agent.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.17.2",
+		"minecraft": "~1.20.4",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
