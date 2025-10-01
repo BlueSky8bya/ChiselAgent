@@ -1,5 +1,7 @@
+// build.gradle
+
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'fabric-loom' version "${loom_version}"  // 마크 버전 1.20.4에 안정적인 Loom : 1.6.12
 	id 'maven-publish'
 }
 
@@ -10,30 +12,33 @@ base {
 	archivesName = project.archives_base_name
 }
 
-repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
-}
+repositories { }
 
 loom {
 	splitEnvironmentSourceSets()
 
-	mods {
-		"chisel-agent" {
-			sourceSet sourceSets.main
-			sourceSet sourceSets.client
-		}
-	}
+    runs {
+        client { }
+        server { }
 
+        // 데이터 생성용 런 구성
+        datagen {
+            // 클라이언트 환경에서 실행
+            client()
+            // 필요시 모드 아이디 지정
+            programArgs "--mod", "chisel-agent", "--all"
+            vmArgs "-Dfabric-api.datagen"
+        }
+    }
 }
 
-fabricApi {
-	configureDataGeneration {
-		client = true
-	}
+// 데이터젠 결과물 리소스 경로 추가
+sourceSets {
+    main {
+        resources {
+            srcDir "src/generated/resources"
+        }
+    }
 }
 
 dependencies {
