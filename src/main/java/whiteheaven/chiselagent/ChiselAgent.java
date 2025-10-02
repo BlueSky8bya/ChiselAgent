@@ -3,24 +3,30 @@
 package whiteheaven.chiselagent;
 
 import net.fabricmc.api.ModInitializer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import whiteheaven.chiselagent.command.AgentCommand;
+import whiteheaven.chiselagent.agent.AgentSpawner;
 
 public class ChiselAgent implements ModInitializer {
-	public static final String MOD_ID = "chisel-agent";
+    public static final String MOD_ID = "chisel-agent";
 
-	// This logger is used to write text to the console and the log file.
-	// It is considered best practice to use your mod id as the logger's name.
-	// That way, it's clear which mod wrote info, warnings, and errors.
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    @Override
+    public void onInitialize() {
+        AgentCommand.register(); // "/agent" 명령어
 
-	@Override
-	public void onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
+        //  ① 접속 시: 남아있는 에이전트 정리해서 아무도 안 남게 함
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            server.execute(() -> AgentSpawner.despawnAllFor(handler.getPlayer()));
+        });
 
-		LOGGER.info("Hello Fabric world!");
-	}
+        // ② 종료 시: 해당 플레이어 소유 에이전트 전부 제거(월드에 안 남게)
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            server.execute(() -> {
+                var player = handler.getPlayer();
+                if (player != null) {
+                    AgentSpawner.despawnAllFor(player);
+                }
+            });
+        });
+    }
 }
