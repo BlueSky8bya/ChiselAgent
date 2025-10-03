@@ -16,7 +16,7 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-            "whiteheaven.chiselagent.ChiselAgentMod"
+            "whiteheaven.chiselagent.ChiselAgent"
 		],
 		"client": [
 			"whiteheaven.chiselagent.ChiselAgentClient"

@@ -12,6 +12,7 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.World;
+import net.minecraft.text.Text;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -47,6 +48,14 @@ public class AgentEntity extends MobEntity {
     public void setOwner(UUID uuid, String name) {
         this.dataTracker.set(OWNER_UUID, Optional.ofNullable(uuid));
         this.dataTracker.set(OWNER_NAME, name == null ? "" : name);
+
+        // (플레이어가 나중에 이름을 바꿔주면 그대로 존중하기 위해 hasCustomName() 체크)
+        if (!this.hasCustomName()){
+            String owner = this.getOwnerName();
+            String label = (owner == null || owner.isBlank()) ? "Agent" : owner + "의 노예";
+            this.setCustomName(Text.literal(label));
+            this.setCustomNameVisible(true);    // 항상 보이게
+        }
     }
 
     public Optional<UUID> getOwnerUuid() { return this.dataTracker.get(OWNER_UUID); }
@@ -59,6 +68,14 @@ public class AgentEntity extends MobEntity {
             this.dataTracker.set(OWNER_UUID, Optional.of(nbt.getUuid("OwnerUUID")));
         }
         this.dataTracker.set(OWNER_NAME, nbt.getString("OwnerName"));
+
+        // 월드 로드시도, 커스텀 이름이 비어 있다면 소유자명 기반으로 기본 이름을 재구성
+        if (!this.hasCustomName()) {
+            String owner = this.getOwnerName();
+            String label = (owner == null || owner.isBlank()) ? "Agent" : owner + "의 노예";
+            this.setCustomName(Text.literal(label));
+            this.setCustomNameVisible(true);
+        }
     }
 
     @Override

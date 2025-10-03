@@ -1,5 +1,4 @@
 // src/client/java/whiteheaven/chiselagent/ChiselAgentClient.java
-
 package whiteheaven.chiselagent;
 
 import net.fabricmc.api.ClientModInitializer;
@@ -13,12 +12,17 @@ import whiteheaven.chiselagent.registry.ModEntities;
 
 public class ChiselAgentClient implements ClientModInitializer {
     public static final EntityModelLayer AGENT_MASK_LAYER =
-            new EntityModelLayer(new Identifier(ChiselAgentMod.MODID, "agent_mask"), "main");
+            new EntityModelLayer(new Identifier(ChiselAgent.MOD_ID, "agent_mask"), "main");
+    public static final EntityModelLayer AGENT_MASK_LAYER_SLIM =
+            new EntityModelLayer(new Identifier(ChiselAgent.MOD_ID, "agent_mask_slim"), "main");
 
     @Override
     public void onInitializeClient() {
-        EntityModelLayerRegistry.registerModelLayer(AGENT_MASK_LAYER, RobotPatchModel::getTexturedModelData);
-        EntityRendererRegistry.register(ModEntities.AGENT, AgentRenderer::new);
+        EntityModelLayerRegistry.registerModelLayer(AGENT_MASK_LAYER,
+                () -> RobotPatchModel.getTexturedModelData(false));
+        EntityModelLayerRegistry.registerModelLayer(AGENT_MASK_LAYER_SLIM,
+                () -> RobotPatchModel.getTexturedModelData(true));
 
+        EntityRendererRegistry.register(ModEntities.AGENT, AgentRenderer::new);
     }
 }

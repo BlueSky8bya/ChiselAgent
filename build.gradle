@@ -19,7 +19,9 @@ loom {
 	splitEnvironmentSourceSets()
 
     runs {
-        client { }
+        client {
+            vmArgs "-Dfabric.log.level=WARN"
+        }
         server { }
 
         // 데이터 생성용 런 (필요할 때만)
