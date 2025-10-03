@@ -24,8 +24,11 @@ import java.util.UUID;
 public class RobotPatchFeatureRenderer<T extends AgentEntity>
         extends FeatureRenderer<T, PlayerEntityModel<T>> {
 
-    private static final Identifier PATCH_TEXTURE =
-            new Identifier(ChiselAgent.MOD_ID, "textures/entity/agent/robot_patch.png");
+    // ▶ 분리 텍스처
+    private static final Identifier CLASSIC_TEX =
+            new Identifier(ChiselAgent.MOD_ID, "textures/entity/agent/robot_patch_classic.png");
+    private static final Identifier SLIM_TEX =
+            new Identifier(ChiselAgent.MOD_ID, "textures/entity/agent/robot_patch_slim.png");
 
     private final RobotPatchModel<T> maskNormal;
     private final RobotPatchModel<T> maskSlim;
@@ -43,29 +46,30 @@ public class RobotPatchFeatureRenderer<T extends AgentEntity>
                        T entity, float limbAngle, float limbDistance, float tickDelta,
                        float animationProgress, float headYaw, float headPitch) {
 
-        PlayerEntityModel<T> ctx = this.getContextModel();
-        RobotPatchModel<T> mask = usesThinArms(entity) ? maskSlim : maskNormal;
+        // 1) 소유자 스킨 규격 감지 (슬림/와이드)
+        SkinTextures st = AgentSkin.findSkinTextures(entity);
+        boolean thin = st != null && st.model() == SkinTextures.Model.SLIM;
 
-        // 1) 현재 프레임의 포즈/가시성 복사
-        ctx.copyStateTo(mask);
-        // 2) 현재 프레임의 애니메이션/각도 적용(팔 스윙, 고개 회전 등)
-        mask.animateModel(entity, limbAngle, limbDistance, tickDelta); // 안전용
+        // 2) 소스(본체) 포즈를 마스크로 복사
+        PlayerEntityModel<T> src = this.getContextModel();
+        RobotPatchModel<T> mask = thin ? maskSlim : maskNormal;
+        src.copyStateTo(mask);
+
+        // 3) 마스크에도 같은 프레임의 애니메이션/각도 적용
+        //    (이걸 안 하면 본체와 분리되어 보입니다)
+        mask.animateModel(entity, limbAngle, limbDistance, tickDelta);
         mask.setAngles(entity, limbAngle, limbDistance, animationProgress, headYaw, headPitch);
 
-        VertexConsumer vc = vcp.getBuffer(RenderLayer.getEntityCutoutNoCull(PATCH_TEXTURE));
+        // 4) 텍스처 선택 + 컷아웃 렌더 (반투명 블렌딩 금지)
+        Identifier tex = thin ? SLIM_TEX : CLASSIC_TEX;
+        VertexConsumer vc = vcp.getBuffer(RenderLayer.getEntityCutoutNoCull(tex));
 
-        // 머리 오버레이 + 오른팔 오버레이만 렌더 (기본 hat/rightSleeve는 꺼둔 상태)
-        mask.hat.render(matrices, vc, light, OverlayTexture.DEFAULT_UV, 1f, 1f, 1f, 1f);
-        mask.rightSleeve.render(matrices, vc, light, OverlayTexture.DEFAULT_UV, 1f, 1f, 1f, 1f);
+        // 5) 필요한 파츠만 렌더
+        mask.hat.render(matrices, vc, light, OverlayTexture.DEFAULT_UV, 1f,1f,1f,1f);
+        mask.rightSleeve.render(matrices, vc, light, OverlayTexture.DEFAULT_UV, 1f,1f,1f,1f);
     }
 
-    /** 현재 스킨이 슬림(Alex)인지 — 1.20.4에서는 enum 비교가 안전 */
-    private boolean usesThinArms(T entity) {
-        SkinTextures st = AgentSkin.findSkinTextures(entity);
-        return st != null && st.model() == SkinTextures.Model.SLIM;
-    }
-
-    /** 스킨 조회 헬퍼 (AgentRenderer와 동일 로직) */
+    /** 스킨 헬퍼: AgentRenderer와 동일 로직 */
     static final class AgentSkin {
         static SkinTextures findSkinTextures(AgentEntity entity) {
             MinecraftClient mc = MinecraftClient.getInstance();
@@ -79,6 +83,7 @@ public class RobotPatchFeatureRenderer<T extends AgentEntity>
                 var entry = mc.getNetworkHandler().getPlayerListEntry(uuid.get());
                 if (entry != null) return mc.getSkinProvider().getSkinTextures(entry.getProfile());
             }
+            // 폴백: 이름/UUID로 캐시 조회
             String name = entity.getOwnerName();
             GameProfile gp = uuid
                     .map(id -> new GameProfile(id, (name == null || name.isEmpty()) ? "Agent" : name))
