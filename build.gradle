@@ -15,13 +15,14 @@ base {
 repositories { }
 
 loom {
+    // 클라/서버 소스셋 분리 (호출 형태로)
 	splitEnvironmentSourceSets()
 
     runs {
         client { }
         server { }
 
-        // 데이터 생성용 런 구성
+        // 데이터 생성용 런 (필요할 때만)
         datagen {
             // 클라이언트 환경에서 실행
             client()
@@ -32,12 +33,17 @@ loom {
     }
 }
 
-// 데이터젠 결과물 리소스 경로 추가
+// 리소스: datagen 결과 포함
 sourceSets {
     main {
         resources {
             srcDir "src/generated/resources"
         }
+    }
+    // client 코드에서 main 산출물 참조
+    client {
+        compileClasspath += main.output
+        runtimeClasspath += main.output
     }
 }
 
@@ -62,7 +68,7 @@ processResources {
 
 // Configure Java
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21) // 빌드는 자바 21로 실행
+    toolchain.languageVersion = JavaLanguageVersion.of(17) // 빌드는 JDK 21로 실행 ???
 }
 
 tasks.withType(JavaCompile).configureEach {
