@@ -18,7 +18,7 @@ public class RobotPatchModel<T extends AgentEntity> extends PlayerEntityModel<T>
 
     /** 바닐라 PlayerEntityModel 레이아웃을 그대로 반환 (피벗/오프셋/UV 모두 일치) */
     public static TexturedModelData getTexturedModelData(boolean slim) {
-        //★ 이 매핑에선 PlayerEntityModel#getTexturedModelData(Dilation, boolean)가 ModelData를 반환함
+        // 이 매핑에선 PlayerEntityModel#getTexturedModelData(Dilation, boolean)가 ModelData를 반환함
         ModelData md = PlayerEntityModel.getTexturedModelData(new Dilation(0.0F), slim);
         return TexturedModelData.of(md, 64, 64); // 64x64 스킨 캔버스
     }

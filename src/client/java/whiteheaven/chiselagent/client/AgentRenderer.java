@@ -40,9 +40,9 @@ public class AgentRenderer extends LivingEntityRenderer<AgentEntity, PlayerEntit
         modelSlim.rightSleeve.visible = false;
 
         // 금속 오버레이(마스크)도 일반/슬림 2종 전달
-        var maskNormal = new RobotPatchModel<AgentEntity>(
+        var maskNormal = new RobotPatchModel<>(
                 ctx.getPart(whiteheaven.chiselagent.ChiselAgentClient.AGENT_MASK_LAYER), false);
-        var maskSlim   = new RobotPatchModel<AgentEntity>(
+        var maskSlim   = new RobotPatchModel<>(
                 ctx.getPart(whiteheaven.chiselagent.ChiselAgentClient.AGENT_MASK_LAYER_SLIM), true);
         this.addFeature(new RobotPatchFeatureRenderer<>(this, maskNormal, maskSlim));
     }

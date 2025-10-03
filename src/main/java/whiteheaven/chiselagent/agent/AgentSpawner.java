@@ -197,6 +197,7 @@ public final class AgentSpawner {
         AgentEntity e = new AgentEntity(whiteheaven.chiselagent.registry.ModEntities.AGENT, world);
         e.refreshPositionAndAngles(pos.x, pos.y, pos.z, player.getYaw(), 0f);
         e.setOwner(player.getUuid(), player.getGameProfile().getName());
+        e.setFollowing(true); // 기본 동작: 소환되면 따라오기
         boolean added = world.spawnEntity(e);
         if (added) {
             LOG.info("spawn(new) owner={} ownerUuid={} agentUuid={} dim={} pos={},{},{}",

@@ -168,6 +168,44 @@ public final class AgentCommand {
                                     return 1;
                                 })
                         )
+
+                        // /agent follow on|off : 에이전트 "따라오기" 토글
+                        .then(literal("follow")
+                                // /agent follow on
+                                .then(literal("on").executes(ctx -> {
+                                    var src = ctx.getSource();
+                                    var p = src.getPlayer();
+                                    if (p == null) {                          // 콘솔에서 실행 시
+                                        send(src, "콘솔에서는 사용할 수 없어요");
+                                        return 0;
+                                    }
+                                    var opt = AgentSpawner.findNearestFor(p);  // 소유자 기준 가장 가까운 에이전트
+                                    if (opt.isEmpty()) {                       // 없으면 안내
+                                        send(src, "노예가 없어요 /agent spawn으로 소환하세요");
+                                        return 0;
+                                    }
+                                    opt.get().setFollowing(true);              // ▶ 따라오기 ON
+                                    send(src, "노예가 당신을 따라다녀요");
+                                    return 1;                                  // 성공
+                                }))
+                                // /agent follow off
+                                .then(literal("off").executes(ctx -> {
+                                    var src = ctx.getSource();
+                                    var p = src.getPlayer();
+                                    if (p == null) {
+                                        send(src, "콘솔에서는 사용할 수 없어요");
+                                        return 0;
+                                    }
+                                    var opt = AgentSpawner.findNearestFor(p);
+                                    if (opt.isEmpty()) {
+                                        send(src, "노예가 없어요 /agent spawn으로 소환하세요");
+                                        return 0;
+                                    }
+                                    opt.get().setFollowing(false);             // ▶ 따라오기 OFF(대기)
+                                    send(src, "노예가 이제 따라오기를 거부해요");
+                                    return 1;
+                                }))
+                        )
         ));
     }
 }
